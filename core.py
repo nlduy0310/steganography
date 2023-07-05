@@ -103,5 +103,6 @@ def lsb_decode(image_path):
     message = bin2str(binary)
     return message
 
-lsb_encode('lena.png', 'message hidden ehehe :v!!')
-print(lsb_decode("steganographic_image.png"))
+if __name__ == '__main__':
+    lsb_encode('lena.png', 'message hidden ehehe :v!!')
+    print(lsb_decode("steganographic_image.png"))
