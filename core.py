@@ -11,17 +11,13 @@ def change_lsb(value, bit):
     value = int(value, 2)
     return value
 
-def lsb_encode(image_path, message):
-    # Open the image file
+def lsb_encode(image_path, message, output_path):
     img = Image.open(image_path)
-    # Convert the image to RGB mode
     img = img.convert("RGB")
-    # Get the pixel data for the image
     pixels = img.load()
 
     # convert message to binary
     converted_message = conv2bin(message)
-    print(converted_message)
     isPadding = False
     need1bit_padding = False
     
@@ -71,15 +67,14 @@ def lsb_encode(image_path, message):
                 b = change_lsb(b, converted_message[2])
                 converted_message = converted_message[3:]
                 pixels[i, j] = (r, g, b)
+                
     # Save the steganographic image
-    img.save("steganographic_image.png")
+    file_name = image_path.split('/')[-1].split('.')[0]
+    img.save(output_path + '/steganographic_' + file_name + '.png')
 
 def lsb_decode(image_path):
-    # Open the image file
     img = Image.open(image_path)
-    # Convert the image to RGB mode
     img = img.convert("RGB")
-    # Get the pixel data for the image
     pixels = img.load()
 
     # Decode the message from the least significant bits of the pixel values
@@ -97,11 +92,9 @@ def lsb_decode(image_path):
             testbin = binary[:i+20]
             binary = binary[:i]
             break
-    # Convert the binary message to a string
-    print(binary)
-    print(testbin)
-    message = bin2str(binary)
-    return message
 
-lsb_encode('lena.png', 'message hidden ehehe :v!!')
-print(lsb_decode("steganographic_image.png"))
+    # Convert the binary message to a string
+    return bin2str(binary)
+
+# lsb_encode('lena.png', 'message hidden ehehe :v!!')
+# print(lsb_decode("steganographic_lena.png.png"))
