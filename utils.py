@@ -1,3 +1,5 @@
+import os
+
 def conv2bin(message):
     # convert message to binary
     return ''.join(format(ord(i), '08b') for i in message)
@@ -18,3 +20,10 @@ def uint2bin(value: int, n_bits=32):
 
 def bin2uint(binary: str):
     return int(binary, 2)
+
+def get_file_extension(path):
+    path = path.strip('.')
+    if path.find('.') == -1:
+        return None
+    else:
+        return path.split('.')[-1]

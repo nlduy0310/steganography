@@ -11,7 +11,7 @@ def change_lsb(value, bit):
     value = int(value, 2)
     return value
 
-def lsb_encode(image_path, message, output_path):
+def lsb_encode(image_path, message, output_file):
     img = Image.open(image_path)
     img = img.convert("RGB")
     pixels = img.load()
@@ -24,7 +24,7 @@ def lsb_encode(image_path, message, output_path):
     # check if the message can be encoded in the image
     if img.size[0] * img.size[1] <= len(converted_message):
         print("The message is too long to be encoded in the image!")
-        return
+        return False, "The message is too long to be encoded in the image!"
     
     # Encode the message in the least significant bits of the pixel values
     for i in range(img.size[0]):
@@ -69,8 +69,8 @@ def lsb_encode(image_path, message, output_path):
                 pixels[i, j] = (r, g, b)
                 
     # Save the steganographic image
-    file_name = image_path.split('/')[-1].split('.')[0]
-    img.save(output_path + '/steganographic_' + file_name + '.png')
+    img.save(output_file)
+    return True, f"The message has been encoded into your image: {output_file}"
 
 def lsb_decode(image_path):
     img = Image.open(image_path)

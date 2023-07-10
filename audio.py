@@ -29,7 +29,7 @@ class AudioSteg:
 
         def encode(data, message, channels=AllChannels):
             if not AudioSteg.LSB.check_message_size(data, message):
-                return None, f'Message size ({len(message)}) exceeds file limit ({(data.shape[0] - AudioSteg.LSB.ReservedBits) // 8})'
+                return False, f'Message size ({len(message)}) exceeds file limit ({(data.shape[0] - AudioSteg.LSB.ReservedBits) // 8})'
             
             bin_message = conv2bin(message)
             
@@ -40,6 +40,7 @@ class AudioSteg:
                 if channel >= 0 and channel < data.shape[1]:
                     AudioSteg.LSB.__encode_channel(data[:, channel], bin_message)
 
+            return True, 'Message has been encoded into your file'
 
         def __set_reserved_bits(channel_data, bin):
             for i in range(AudioSteg.LSB.ReservedBits):
