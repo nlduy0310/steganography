@@ -146,41 +146,63 @@ def application():
     ## Tab 2
     # Decode process
     # File path process
-    file_path_text_2 = Label(tab2, font=(text_style, text_size),text='File path:', bg=bg_color)
-    file_path_text_2.place(x=30, y=30)
+    t2_input_path_label = Label(tab2, font=(text_style, text_size),text='Cover file:', bg=bg_color)
+    t2_input_path_label.place(x=30, y=30)
 
-    entry_path_2 = Entry(tab2, width=45, font=(text_style, text_size))
-    entry_path_2.place(x=110, y=30)
+    t2_input_path = Entry(tab2, width=45, font=(text_style, text_size))
+    t2_input_path.place(x=110, y=30)
 
-    def browsefunc_input():
+    t2_output_message_label = Label(tab2, font=(text_style, text_size), text='Decoded message:', bg=bg_color)
+    t2_output_message_label.place(x=30, y=80)
+
+    t2_output_message = Entry(tab2, width=45, font=(text_style, text_size))
+    t2_output_message.place(x=110, y=80)
+
+    def t2_browsefunc_input():
         cur_dir = os.getcwd()
-        input_path = filedialog.askopenfilename(
+        tmp = filedialog.askopenfilename(
             initialdir=cur_dir, title='Select file')
-        setEntryText(entry_path_2, input_path)  # add this
+        setEntryText(t2_input_path, tmp)  # add this
 
     button_tab2 = Button(tab2, text='Browse', width=5,
-                    height=1, bg=bg_color, borderwidth=2, command=browsefunc_input)
-    button_tab2.place(x=580, y=28)
+                    height=1, bg=bg_color, borderwidth=2, command=t2_browsefunc_input)
+    button_tab2.place(x=580, y=30)
 
-    t1_file_type_option = StringVar(tab2)
-    t1_file_type_option.set("Image") # default value
+    t2_file_type_option = StringVar(tab2)
+    t2_file_type_option.set("Image") # default value
 
-    w = OptionMenu(tab2, t1_file_type_option, "Image", "Audio")
-    w.pack(expand=True)
-    w.place(x=400, y=80)
+    w2 = OptionMenu(tab2, t2_file_type_option, "Image", "Audio",
+                   command=lambda selection: t2_file_type_option.set(selection))
+    w2.pack(expand=True)
+    w2.place(x=400, y=130)
 
     def handle_decode():
-        if t1_file_type_option.get() == "Image":
-            decoded = lsb_decode(entry_path_2.get())
-            # result_text = Label(tab2, font=(text_style, text_size), text='Result: ' + decoded, bg='red')
-            # result_text.place(x=30, y=150)
-            print(decoded)
-        else:
-            print('audio')
+        file_type = t2_file_type_option.get()
+        inp = t2_input_path.get()
 
+        if not inp or not os.path.exists(inp):
+            messagebox.showerror('Error', 'Invalid input path: ' + inp)
+            return
+        if utils.get_file_extension(inp) is None or utils.get_file_extension(inp) not in SupportedFileExts[file_type]:
+            messagebox.showerror('Error', f'Unsupported file type: {utils.get_file_extension(inp)}. Please use files with the following extensions: {", ".join(SupportedFileExts[file_type])}')
+            return
+        
+        if file_type == "Image":
+            try: 
+                decoded = lsb_decode(inp)
+                setEntryText(t2_output_message, decoded)
+            except Exception as e:
+                messagebox.showerror('Error', str(e))
+        elif file_type == "Audio":
+            try:
+                _, data, _, _ = AudioSteg.wav_data(inp)
+                res = AudioSteg.LSB.decode(data, channels=[0])
+                setEntryText(t2_output_message, res[0])
+            except Exception as e:
+                messagebox.showerror('Error', str(e))
     button_decode = Button(tab2, text='Reveal message', width=25,
                     height=1, bg=bg_color, borderwidth=2, command=handle_decode)
-    button_decode.place(x=110, y=80)
+    button_decode.place(x=110, y=130)
 
     win.mainloop()
 
