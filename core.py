@@ -89,14 +89,8 @@ def lsb_decode(image_path):
     # calculate the padding to remove
     for i in range(len(binary)-1, -1, -1):
         if binary[i] == '1':
-            testbin = binary[:i+20]
             binary = binary[:i]
             break
 
     # Convert the binary message to a string
     return bin2str(binary)
-
-
-if __name__ == '__main__':
-    lsb_encode('lena.png', 'message hidden ehehe :v!!')
-    print(lsb_decode("steganographic_image.png"))

@@ -5,6 +5,7 @@ import os
 from core import *
 from configs import *
 from audio import *
+from ccrypt import *
 import utils
 
 # constants
@@ -59,8 +60,15 @@ def application():
     t1_secret_message_label = Label(tab1, font=(text_style, text_size), text='Message:', bg=bg_color)
     t1_secret_message_label.place(x=30, y=80)
 
-    t1_secret_message = Text(tab1, width=56, height=8)
+    t1_secret_message = Text(tab1, width=56, height=6)
     t1_secret_message.place(x=110, y=80)    
+
+    # Password
+    t1_password_label = Label(tab1, font=(text_style, text_size), text='Password:', bg=bg_color)
+    t1_password_label.place(x=30, y=205)
+
+    t1_password = Entry(tab1, width=45, font=(text_style, text_size))
+    t1_password.place(x=110, y=205)
 
     # Output process
     t1_output_folder_label = Label(tab1, font=(text_style, text_size), text='Output:', bg=bg_color)
@@ -91,7 +99,13 @@ def application():
         file_type = t1_file_type_option.get()
         inp = t1_input_path.get()
         msg = t1_secret_message.get('1.0', 'end-1c')
+        password = t1_password.get()
         outp = t1_output_folder.get()
+
+        # encrypt message
+        if password:
+            msg = CCrypt.encode(msg, password)
+            print(msg)
 
         if not inp or not os.path.exists(inp):
             messagebox.showerror('Error', 'Invalid input path: ' + inp)
@@ -137,7 +151,7 @@ def application():
         
 
 
-    button_encode = Button(tab1, text='Hide message', width=25,
+    button_encode = Button(tab1, font=(text_style, text_size), text='Hide message', width=25,
                     height=1, bg=bg_color, borderwidth=2, command=handle_encode)
     button_encode.place(x=110, y=290)
 
@@ -152,11 +166,18 @@ def application():
     t2_input_path = Entry(tab2, width=45, font=(text_style, text_size))
     t2_input_path.place(x=110, y=30)
 
-    t2_output_message_label = Label(tab2, font=(text_style, text_size), text='Decoded message:', bg=bg_color)
-    t2_output_message_label.place(x=30, y=80)
+    # Password
+    t2_password_label = Label(tab2, font=(text_style, text_size), text='Password:', bg=bg_color)
+    t2_password_label.place(x=30, y=80)
+
+    t2_password = Entry(tab2, width=45, font=(text_style, text_size))
+    t2_password.place(x=110, y=80)
+
+    t2_output_message_label = Label(tab2, font=(text_style, text_size), text='Message:', bg=bg_color)
+    t2_output_message_label.place(x=30, y=130)
 
     t2_output_message = Entry(tab2, width=45, font=(text_style, text_size))
-    t2_output_message.place(x=110, y=80)
+    t2_output_message.place(x=110, y=130)
 
     def t2_browsefunc_input():
         cur_dir = os.getcwd()
@@ -174,11 +195,12 @@ def application():
     w2 = OptionMenu(tab2, t2_file_type_option, "Image", "Audio",
                    command=lambda selection: t2_file_type_option.set(selection))
     w2.pack(expand=True)
-    w2.place(x=400, y=130)
+    w2.place(x=400, y=160)
 
     def handle_decode():
         file_type = t2_file_type_option.get()
         inp = t2_input_path.get()
+        password = t2_password.get()
 
         if not inp or not os.path.exists(inp):
             messagebox.showerror('Error', 'Invalid input path: ' + inp)
@@ -190,19 +212,21 @@ def application():
         if file_type == "Image":
             try: 
                 decoded = lsb_decode(inp)
-                setEntryText(t2_output_message, decoded)
+                decrypted = CCrypt.decode(decoded, password)
+                setEntryText(t2_output_message, decrypted)
             except Exception as e:
                 messagebox.showerror('Error', str(e))
         elif file_type == "Audio":
             try:
                 _, data, _, _ = AudioSteg.wav_data(inp)
                 res = AudioSteg.LSB.decode(data, channels=[0])
-                setEntryText(t2_output_message, res[0])
+                decrypted = CCrypt.decode(res[0], password)
+                setEntryText(t2_output_message, decrypted)
             except Exception as e:
                 messagebox.showerror('Error', str(e))
     button_decode = Button(tab2, text='Reveal message', width=25,
                     height=1, bg=bg_color, borderwidth=2, command=handle_decode)
-    button_decode.place(x=110, y=130)
+    button_decode.place(x=110, y=160)
 
     win.mainloop()
 
