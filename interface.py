@@ -212,16 +212,28 @@ def application():
         if file_type == "Image":
             try: 
                 decoded = lsb_decode(inp)
-                decrypted = CCrypt.decode(decoded, password)
-                setEntryText(t2_output_message, decrypted)
+                if password:
+                    success, decrypted = CCrypt.decode(decoded, password)
+                    if success:
+                        setEntryText(t2_output_message, decrypted)
+                    else:
+                        messagebox.showerror('Error', 'Invalid password')
+                else:
+                    setEntryText(t2_output_message, decoded)
             except Exception as e:
                 messagebox.showerror('Error', str(e))
         elif file_type == "Audio":
             try:
                 _, data, _, _ = AudioSteg.wav_data(inp)
                 res = AudioSteg.LSB.decode(data, channels=[0])
-                decrypted = CCrypt.decode(res[0], password)
-                setEntryText(t2_output_message, decrypted)
+                if password:
+                    success, decrypted = CCrypt.decode(res[0], password)
+                    if success:
+                        setEntryText(t2_output_message, decrypted)
+                    else:
+                        messagebox.showerror('Error', 'Invalid password')
+                else:
+                    setEntryText(t2_output_message, res[0])
             except Exception as e:
                 messagebox.showerror('Error', str(e))
     button_decode = Button(tab2, text='Reveal message', width=25,
